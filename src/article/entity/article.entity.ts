@@ -1,8 +1,9 @@
+import { CommonEntity } from 'src/common/entity/common.entity';
 import { UserEntity } from './../../user/user.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
-export class ArticleEntity {
+export class ArticleEntity extends CommonEntity {
   @ManyToOne(
     () => UserEntity,
     (UserEntity) => {
