@@ -1,19 +1,29 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { UserEntity } from './../../user/user.entity';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class ArticleEntity {
-    @Column()
-    title: string;
+  @ManyToOne(
+    () => UserEntity,
+    (UserEntity) => {
+      UserEntity.id;
+    },
+  )
+  @JoinColumn()
+  user_id: UserEntity;
 
-    @Column()
-    description: string;
+  @Column()
+  title: string;
 
-    @Column()
-    difficulty: number;
+  @Column()
+  description: string;
 
-    @Column()
-    is_public: boolean;
+  @Column()
+  difficulty: number;
 
-    @Column()
-    has_ad: boolean;
+  @Column()
+  is_public: boolean;
+
+  @Column()
+  has_ad: boolean;
 }
