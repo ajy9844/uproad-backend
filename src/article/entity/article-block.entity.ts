@@ -1,10 +1,10 @@
 import { CommonEntity } from 'src/common/entity/common.entity';
-import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ArticleEntity } from './article.entity';
 
 @Entity('article_block')
 export class ArticleBlockEntity extends CommonEntity {
-  @OneToOne(
+  @ManyToOne(
     () => ArticleEntity,
     (ArticleEntity) => {
       ArticleEntity.id;
