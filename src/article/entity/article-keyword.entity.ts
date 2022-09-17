@@ -1,24 +1,25 @@
-import { Entity, JoinTable, ManyToMany } from 'typeorm';
+import { CommonEntity } from 'src/common/entity/common.entity';
+import { Entity, JoinTable, ManyToOne } from 'typeorm';
 import { KeywordEntity } from './keyword.entity';
 import { ArticleEntity } from './article.entity';
 
-@Entity()
-export class ArticleKeywordEntity {
-  @ManyToMany(
+@Entity('article_keyword')
+export class ArticleKeywordEntity extends CommonEntity {
+  @ManyToOne(
     () => KeywordEntity,
     (KeywordEntity) => {
       KeywordEntity.id;
     },
   )
   @JoinTable()
-  keyword_id: number;
+  keyword_id: KeywordEntity;
 
-  @ManyToMany(
+  @ManyToOne(
     () => ArticleEntity,
     (ArticleEntity) => {
       ArticleEntity.id;
     },
   )
   @JoinTable()
-  article_id: number;
+  article_id: ArticleEntity;
 }

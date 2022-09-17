@@ -1,7 +1,7 @@
 import { CommonEntity } from 'src/common/entity/common.entity';
 import { Entity, Column } from 'typeorm';
 
-@Entity()
+@Entity('user')
 export class UserEntity extends CommonEntity {
   @Column()
   account_address: string;

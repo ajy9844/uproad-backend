@@ -3,7 +3,7 @@ import { ArticleEntity } from 'src/article/entity/article.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { Entity, ManyToOne, JoinColumn } from 'typeorm';
 
-@Entity()
+@Entity('like')
 export class LikeEntity extends CommonEntity {
   @ManyToOne(
     () => ArticleEntity,
