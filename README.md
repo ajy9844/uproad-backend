@@ -47,6 +47,13 @@ $ npm run start:prod
 
 ## Running the app and db with Docker Compose ([Ref](https://learn.microsoft.com/ko-kr/visualstudio/docker/tutorials/tutorial-multi-container-app-mysql))
 
+### Frontend Project를 Submodule로 가져오기
+
+```bash
+git submodule init
+git submodule update
+```
+
 ### Start
 
 ```bash

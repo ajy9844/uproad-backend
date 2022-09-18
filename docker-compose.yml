@@ -18,6 +18,7 @@ services:
 
   mysql:
     image: mysql:5.7
+    platform: linux/amd64
     volumes:
       - uproad-mysql-data:/var/lib/mysql
     environment: 
