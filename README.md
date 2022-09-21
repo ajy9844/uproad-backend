@@ -45,6 +45,62 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Running the app and db with Docker Compose ([Ref](https://learn.microsoft.com/ko-kr/visualstudio/docker/tutorials/tutorial-multi-container-app-mysql))
+
+### Frontend Project를 Submodule로 가져오기
+
+```bash
+git submodule init
+git submodule update
+```
+
+### Start
+
+```bash
+docker-compose up -d
+```
+
+and then, open http://localhost:3000
+
+### Shutdown and Clean-up
+
+```bash
+docker-compose down --volumes
+```
+
+## Running the app and db with Docker ([Ref](https://learn.microsoft.com/ko-kr/visualstudio/docker/tutorials/tutorial-multi-container-app-mysql))
+
+```bash
+docker network create uproad-backend
+```
+
+```bash
+docker run -d \
+  --name uproad-db
+  --network uproad-backend \
+  --network-alias mysql \
+  -e MYSQL_ROOT_PASSWORD=uproad88 \
+  -e MYSQL_DATABASE=uproad \
+  mysql:5.7
+```
+
+```bash
+docker exec -it uproad-db mysql -p
+```
+
+```bash
+docker run -dp 3000:3000 \
+  -w /app -v ${PWD}:/app \
+  --network uproad-backend \
+  -e DATABASE_HOST=mysql \
+  -e DATABASE_PORT=3306 \
+  -e DATABASE_USERNAME=root \
+  -e DATABASE_PASSWORD=uproad88 \
+  -e DATABASE_NAME=uproad \
+  node:16-alpine \
+  sh -c "npm install && npm run start"
+```
+
 ## Test
 
 ```bash

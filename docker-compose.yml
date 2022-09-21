@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+  backend:
+    image: node:16-alpine
+    command: sh -c "npm install && npm run start"
+    ports:
+      - 3000:3000
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_USERNAME: root
+      DATABASE_PASSWORD: uproad88
+      DATABASE_NAME: uproad
+
+  mysql:
+    image: mysql:5.7
+    platform: linux/amd64
+    ports:
+      - 3306:3306
+    volumes:
+      - uproad-mysql-data:/var/lib/mysql
+    environment: 
+      MYSQL_ROOT_PASSWORD: uproad88
+      MYSQL_DATABASE: uproad
+
+  frontend:
+    image: node:16-alpine
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - 8080:3000
+    working_dir: /app
+    volumes:
+      - ./up-road-frontend/:/app    
+
+volumes:
+  uproad-mysql-data:

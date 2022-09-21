@@ -1,0 +1,3 @@
+[submodule "up-road-frontend"]
+	path = up-road-frontend
+	url = https://github.com/web3snack/up-road-frontend
