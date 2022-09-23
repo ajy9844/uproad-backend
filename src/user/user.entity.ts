@@ -6,12 +6,12 @@ export class UserEntity extends CommonEntity {
   @Column()
   account_address: string;
 
-  @Column()
+  @Column({ nullable: true })
   nickname: string;
 
-  @Column()
+  @Column({ nullable: true })
   profile_image: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 }

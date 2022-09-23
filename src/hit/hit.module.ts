@@ -4,6 +4,6 @@ import { HitController } from './hit.controller';
 
 @Module({
   providers: [HitService],
-  controllers: [HitController]
+  controllers: [HitController],
 })
 export class HitModule {}
