@@ -19,7 +19,7 @@ export const TypeOrmConfig = {
     username: configService.get('DATABASE_USERNAME'),
     password: configService.get('DATABASE_PASSWORD'),
     database: configService.get('DATABASE_NAME'),
-    synchronize: false,
+    synchronize: true,
     autoLoadEntities: process.env.NODE_ENV !== 'prod',
     logging: process.env.NODE_ENV !== 'prod',
     keepConnectionAlive: true,
