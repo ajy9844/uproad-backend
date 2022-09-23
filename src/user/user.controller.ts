@@ -15,4 +15,10 @@ export class UserController {
   ) {
     return this.userService.updateUser(updateUserRequestDto, request.user);
   }
+
+  @UseGuards(UserAuthGuard)
+  @Get()
+  findMyInfo(@Req() request) {
+    return request.user;
+  }
 }
