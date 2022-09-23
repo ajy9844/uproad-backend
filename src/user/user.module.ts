@@ -1,3 +1,4 @@
+import { AuthModule } from './../auth/auth.module';
 import { UserEntity } from 'src/user/user.entity';
 import { UserRepository } from './user.repository';
 import { Module } from '@nestjs/common';

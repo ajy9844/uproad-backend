@@ -23,7 +23,9 @@ export class AuthService {
       user = await this.userService.findOne(account_address);
     }
 
-    const accessToken = await this.jwtService.createJwtToken({ sub: user.id });
+    const accessToken = await this.jwtService.createJwtToken({
+      sub: user.account_address,
+    });
 
     return { accessToken: accessToken };
   }
