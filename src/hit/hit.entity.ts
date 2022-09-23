@@ -11,8 +11,8 @@ export class HitEntity extends CommonEntity {
       ArticleEntity.id;
     },
   )
-  @JoinColumn()
-  article_id: ArticleEntity;
+  @JoinColumn({ name: 'article_id' })
+  article: ArticleEntity;
 
   @ManyToOne(
     () => UserEntity,
@@ -20,6 +20,6 @@ export class HitEntity extends CommonEntity {
       UserEntity.id;
     },
   )
-  @JoinColumn()
-  user_id: UserEntity;
+  @JoinColumn({ name: 'user_id' })
+  user: UserEntity;
 }

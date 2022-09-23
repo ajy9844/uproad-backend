@@ -23,7 +23,7 @@ export class AdvertisementService {
     });
 
     if (ad.user.id !== user.id) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('권한이 없습니다.');
     }
 
     const { title, link } = updateAdvertisementRequestDto;

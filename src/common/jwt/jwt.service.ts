@@ -16,13 +16,13 @@ export class JWTService {
     });
   }
 
-  // async splitAuthorization(authorization: string): Promise<string> {
-  //   return authorization.split('Bearer ').at(-1) as string;
-  // }
+  async splitAuthorization(authorization: string): Promise<string> {
+    return authorization.split('Bearer ').at(-1) as string;
+  }
 
-  // async verify(token: string): Promise<JwtPayload> {
-  //   return this.jwtService.verify(token, {
-  //     secret: process.env.USER_JWT_SECRET,
-  //   });
-  // }
+  async verify(token: string): Promise<JwtPayload> {
+    return this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+  }
 }
