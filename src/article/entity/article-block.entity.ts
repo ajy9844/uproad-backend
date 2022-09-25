@@ -4,12 +4,7 @@ import { ArticleEntity } from './article.entity';
 
 @Entity('article_block')
 export class ArticleBlockEntity extends CommonEntity {
-  @ManyToOne(
-    () => ArticleEntity,
-    (ArticleEntity) => {
-      ArticleEntity.id;
-    },
-  )
+  @ManyToOne(() => ArticleEntity)
   @JoinColumn({ name: 'article_id' })
   article: ArticleEntity;
 

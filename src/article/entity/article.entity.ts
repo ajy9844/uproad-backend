@@ -4,13 +4,7 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('article')
 export class ArticleEntity extends CommonEntity {
-  @ManyToOne(
-    () => UserEntity,
-    (UserEntity) => {
-      UserEntity.id;
-    },
-    { onDelete: 'CASCADE' },
-  )
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 

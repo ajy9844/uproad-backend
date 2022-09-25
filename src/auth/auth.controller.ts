@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -27,8 +28,8 @@ export class AuthController {
     return this.authService.signup(signupRequestDto);
   }
 
-  @Get()
-  isSignup(@Body() signupRequestDto: IsSignupRequestDto) {
+  @Get(':accout_wallet')
+  isSignup(@Param() signupRequestDto: IsSignupRequestDto) {
     return this.authService.isSignup(signupRequestDto);
   }
 
