@@ -11,7 +11,7 @@ export class AdvertisementEntity extends CommonEntity {
       ArticleEntity.id;
     },
   )
-  @JoinColumn()
+  @JoinColumn({ name: 'article_id' })
   article: ArticleEntity;
 
   @ManyToOne(
@@ -20,7 +20,7 @@ export class AdvertisementEntity extends CommonEntity {
       UserEntity.id;
     },
   )
-  @JoinColumn()
+  @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
   @Column()

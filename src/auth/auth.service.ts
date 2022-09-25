@@ -1,3 +1,4 @@
+import { IsSignupRequestDto } from './dto/is-signup.request.dto';
 import { UserService } from './../user/user.service';
 import { Injectable } from '@nestjs/common';
 import { JWTService } from 'src/common/jwt/jwt.service';
@@ -28,5 +29,16 @@ export class AuthService {
     });
 
     return { accessToken: accessToken };
+  }
+
+  async isSignup(isSignupRequestDto: IsSignupRequestDto) {
+    const { account_address } = isSignupRequestDto;
+
+    const user = await this.userService.findOne(account_address);
+
+    if (!user) {
+      return false;
+    }
+    return true;
   }
 }

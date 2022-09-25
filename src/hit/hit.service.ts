@@ -37,14 +37,10 @@ export class HitService {
     hitEntity.user = user;
     hitEntity.article = article;
 
-    // TODO 
     // const hit = await this.hitRepository.findOne({
-    //   relations: ['user', 'article'],
-    //   where: { user },
+    //   where: { user: user, article: article },
     // });
 
-    // console.log(hit);
-
-    this.hitRepository.save(hitEntity);
+    await this.hitRepository.save(hitEntity);
   }
 }

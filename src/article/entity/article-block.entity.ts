@@ -10,8 +10,8 @@ export class ArticleBlockEntity extends CommonEntity {
       ArticleEntity.id;
     },
   )
-  @JoinColumn()
-  article_id: ArticleEntity;
+  @JoinColumn({ name: 'article_id' })
+  article: ArticleEntity;
 
   @Column()
   order: number;
