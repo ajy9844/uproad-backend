@@ -9,6 +9,7 @@ export class ArticleEntity extends CommonEntity {
     (UserEntity) => {
       UserEntity.id;
     },
+    { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;

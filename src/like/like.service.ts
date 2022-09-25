@@ -1,7 +1,7 @@
 import { ArticleRepository } from './../article/article.repository';
 import { ArticleEntity } from 'src/article/entity/article.entity';
 import { LikeEntity } from './like.entity';
-import { Injectable, Delete } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LikeRepository } from './like.repository';
 import { UserEntity } from 'src/user/user.entity';
@@ -18,13 +18,14 @@ export class LikeService {
   async like(articleId: number, user: UserEntity) {
     const article = await this.articleRepository.findOneBy({ id: articleId });
 
-    // const isLike = await this.likeRepository.findOne({
-    //   where: { user, article },
-    // });
+    const isLike = await this.likeRepository.findOne({
+      relations: { user: true, article: true },
+      where: { user, article },
+    });
 
-    // if (isLike) {
-    //   return;
-    // }
+    if (isLike) {
+      return;
+    }
 
     const likeEntity = new LikeEntity();
     likeEntity.user = user;
@@ -36,13 +37,14 @@ export class LikeService {
   async unLike(articleId: number, user: UserEntity) {
     const article = await this.articleRepository.findOneBy({ id: articleId });
 
-    // const isLike = await this.likeRepository.findOne({
-    //   where: { user, article },
-    // });
+    const isLike = await this.likeRepository.findOne({
+      where: { user, article },
+      relations: { user: true, article: true },
+    });
 
-    // if (!isLike) {
-    //   return;
-    // }
+    if (!isLike) {
+      return;
+    }
 
     const likeEntity = new LikeEntity();
     likeEntity.user = user;

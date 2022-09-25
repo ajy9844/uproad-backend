@@ -5,21 +5,11 @@ import { Entity, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity('hit')
 export class HitEntity extends CommonEntity {
-  @ManyToOne(
-    () => ArticleEntity,
-    (ArticleEntity) => {
-      ArticleEntity.id;
-    },
-  )
+  @ManyToOne(() => ArticleEntity)
   @JoinColumn({ name: 'article_id' })
   article: ArticleEntity;
 
-  @ManyToOne(
-    () => UserEntity,
-    (UserEntity) => {
-      UserEntity.id;
-    },
-  )
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 }

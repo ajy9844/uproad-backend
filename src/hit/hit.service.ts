@@ -29,17 +29,22 @@ export class HitService {
     const payload = await this.jwtService.verify(token);
     const user = await this.userService.findOne(payload.sub);
 
-    const article = await this.articleRepository.findOne({
-      where: { id: articleId },
-    });
+    const article = await this.articleRepository.findOneBy({ id: articleId });
 
     const hitEntity = new HitEntity();
     hitEntity.user = user;
     hitEntity.article = article;
 
-    // const hit = await this.hitRepository.findOne({
-    //   where: { user: user, article: article },
-    // });
+    const hit = await this.hitRepository.findOne({
+      relations: { user: true, article: true },
+      where: { user: hitEntity.user, article: hitEntity.article },
+    });
+
+    console.log(hit);
+
+    if (hit) {
+      return true;
+    }
 
     await this.hitRepository.save(hitEntity);
   }
