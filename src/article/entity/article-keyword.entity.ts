@@ -5,21 +5,11 @@ import { ArticleEntity } from './article.entity';
 
 @Entity('article_keyword')
 export class ArticleKeywordEntity extends CommonEntity {
-  @ManyToOne(
-    () => KeywordEntity,
-    (KeywordEntity) => {
-      KeywordEntity.id;
-    },
-  )
+  @ManyToOne(() => KeywordEntity)
   @JoinTable({ name: 'keyword_id' })
   keyword: KeywordEntity;
 
-  @ManyToOne(
-    () => ArticleEntity,
-    (ArticleEntity) => {
-      ArticleEntity.id;
-    },
-  )
+  @ManyToOne(() => ArticleEntity)
   @JoinTable()
   article_id: ArticleEntity;
 }
