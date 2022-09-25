@@ -1,6 +1,14 @@
 import { UserAuthGuard } from '../common/guard/auth.guard';
 import { UserService } from './user.service';
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UpdateUserRequestDto } from './dto/update-user.request.dto';
 
 @Controller('user')

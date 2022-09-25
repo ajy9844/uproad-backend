@@ -1,3 +1,3 @@
-export interface SigninRequestDto {
+export class SigninRequestDto {
   account_address: string;
 }

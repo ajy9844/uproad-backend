@@ -11,8 +11,8 @@ export class ArticleKeywordEntity extends CommonEntity {
       KeywordEntity.id;
     },
   )
-  @JoinTable()
-  keyword_id: KeywordEntity;
+  @JoinTable({ name: 'keyword_id' })
+  keyword: KeywordEntity;
 
   @ManyToOne(
     () => ArticleEntity,
