@@ -1,6 +1,6 @@
 import { AdvertisementRepository } from './../advertisement/advertisement.repository';
 import { AdvertisementEntity } from './../advertisement/advertisement.entity';
-import { ArticleRepository } from './../article/article.repository';
+import { ArticleRepository } from './../article/repository/article.repository';
 import { ArticleEntity } from 'src/article/entity/article.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { UserRepository } from 'src/user/user.repository';
