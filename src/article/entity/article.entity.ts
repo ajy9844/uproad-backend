@@ -15,7 +15,7 @@ export class ArticleEntity extends CommonEntity {
   description: string;
 
   @Column()
-  difficulty: number;
+  level: number;
 
   @Column()
   is_public: boolean;

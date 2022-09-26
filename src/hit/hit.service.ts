@@ -1,5 +1,4 @@
-import { UserEntity } from 'src/user/user.entity';
-import { ArticleRepository } from './../article/article.repository';
+import { ArticleRepository } from '../article/repository/article.repository';
 import { ArticleEntity } from './../article/entity/article.entity';
 import { HitEntity } from './hit.entity';
 import { HitRepository } from './hit.repository';
