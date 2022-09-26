@@ -66,7 +66,6 @@ export class ArticleService {
       const keyword = await this.keywordRepository.findOne({
         where: { name: name },
       });
-
       const articleKeyword = new ArticleKeywordEntity();
       articleKeyword.article = article;
       articleKeyword.keyword = keyword;
@@ -105,7 +104,6 @@ export class ArticleService {
     if (article.user.id !== user.id) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
-
     // 아티클 수정
     article.title = title;
     article.description = description;
@@ -118,7 +116,6 @@ export class ArticleService {
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-
     // 신규 아티클 블럭 생성
     for (const block of blocks) {
       const articleBlock = new ArticleBlockEntity();
@@ -134,13 +131,11 @@ export class ArticleService {
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-
     // 신규 아티클 키워드 생성
     for (const name of keywords) {
       const keyword = await this.keywordRepository.findOne({
         where: { name: name },
       });
-
       const articleKeyword = new ArticleKeywordEntity();
       articleKeyword.article = article;
       articleKeyword.keyword = keyword;
@@ -169,13 +164,11 @@ export class ArticleService {
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-
     // 관련 아티클 키워드 삭제
     await this.articleKeywordRepository.softDelete({
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-
     // 아티클 삭제
     await this.articleRepository.softDelete({
       id: article.id,
