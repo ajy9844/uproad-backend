@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Req, Body, Patch, Param, } from '@nestjs/common';
+import { Controller, UseGuards, Post, Req, Body, Patch, Param, Delete, HttpCode,} from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { UserAuthGuard } from 'src/common/guard/auth.guard';
 import { CreateArticleRequestDto } from './dto/create.article.request.dto';
@@ -32,5 +32,12 @@ export class ArticleController {
       request.user,
       updateArticleRequestDto,
     );
+  }
+
+  @UseGuards(UserAuthGuard)
+  @Delete(':id')
+  @HttpCode(204)
+  deleteArticle(@Param('id') id: number, @Req() request) {
+    return this.articleService.deleteArticle(id, request.user);
   }
 }

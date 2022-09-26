@@ -149,4 +149,36 @@ export class ArticleService {
 
     return { id: article.id };
   }
+
+  async deleteArticle(id: number, user: UserEntity) {
+    const article = await this.articleRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+
+    if (article === null) {
+      throw new NotFoundException('삭제되었거나 존재하지 않는 게시물입니다.');
+    }
+    if (article.user.id !== user.id) {
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+
+    // TODO: CASCADE 사용해서 연관 엔티티들 삭제
+    // 관련 아티클 블럭 삭제
+    await this.articleBlockRepository.softDelete({
+      article: { id: article.id },
+      deleted_at: IsNull(),
+    });
+
+    // 관련 아티클 키워드 삭제
+    await this.articleKeywordRepository.softDelete({
+      article: { id: article.id },
+      deleted_at: IsNull(),
+    });
+
+    // 아티클 삭제
+    await this.articleRepository.softDelete({
+      id: article.id,
+    });
+  }
 }
