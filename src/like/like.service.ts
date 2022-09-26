@@ -18,15 +18,6 @@ export class LikeService {
   async like(articleId: number, user: UserEntity) {
     const article = await this.articleRepository.findOneBy({ id: articleId });
 
-    const isLike = await this.likeRepository.findOne({
-      relations: { user: true, article: true },
-      where: { user, article },
-    });
-
-    if (isLike) {
-      return;
-    }
-
     const likeEntity = new LikeEntity();
     likeEntity.user = user;
     likeEntity.article = article;
@@ -36,15 +27,6 @@ export class LikeService {
 
   async unLike(articleId: number, user: UserEntity) {
     const article = await this.articleRepository.findOneBy({ id: articleId });
-
-    const isLike = await this.likeRepository.findOne({
-      where: { user, article },
-      relations: { user: true, article: true },
-    });
-
-    if (!isLike) {
-      return;
-    }
 
     const likeEntity = new LikeEntity();
     likeEntity.user = user;

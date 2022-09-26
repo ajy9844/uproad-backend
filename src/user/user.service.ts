@@ -1,3 +1,7 @@
+import { AdvertisementRepository } from './../advertisement/advertisement.repository';
+import { AdvertisementEntity } from './../advertisement/advertisement.entity';
+import { ArticleRepository } from './../article/article.repository';
+import { ArticleEntity } from 'src/article/entity/article.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { Injectable } from '@nestjs/common';
@@ -9,6 +13,10 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: UserRepository,
+    @InjectRepository(ArticleEntity)
+    private readonly articleRepository: ArticleRepository,
+    @InjectRepository(AdvertisementEntity)
+    private readonly advertisementRepository: AdvertisementRepository,
   ) {}
 
   async updateUser(
@@ -34,5 +42,11 @@ export class UserService {
 
   async save(user: UserEntity) {
     await this.userRepository.save(user);
+  }
+
+  async getMyAdvertisement(user: UserEntity) {
+    return await this.advertisementRepository.find({
+      where: { user: { id: user.id } },
+    });
   }
 }

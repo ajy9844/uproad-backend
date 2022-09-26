@@ -34,4 +34,10 @@ export class AdvertisementService {
 
     await this.advertisementRepository.update(id, advertisementEntity);
   }
+
+  getAdvertisement(id: number) {
+    return this.advertisementRepository.findOne({
+      where: { id },
+    });
+  }
 }
