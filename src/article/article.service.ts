@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArticleEntity } from './entity/article.entity';
 import { ArticleRepository } from './repository/article.repository';
@@ -13,6 +13,7 @@ import { AdvertisementRepository } from '../advertisement/advertisement.reposito
 import { UserEntity } from '../user/user.entity';
 import { CreateArticleRequestDto } from './dto/create.article.request.dto';
 import { UpdateArticleRequestDto } from './dto/update.article.request.dto';
+import { IsNull } from 'typeorm';
 
 @Injectable()
 export class ArticleService {
@@ -80,6 +81,70 @@ export class ArticleService {
       articleAdvertisement.link = advertisement.link;
       articleAdvertisement.current_price = advertisement.current_price;
       await this.advertisementRepository.save(articleAdvertisement);
+    }
+
+    return { id: article.id };
+  }
+
+  async updateArticle(
+    id: number,
+    user: UserEntity,
+    updateArticleRequestDto: UpdateArticleRequestDto,
+  ) {
+    const { title, description, keywords, level, blocks, is_public } =
+      updateArticleRequestDto;
+
+    const article = await this.articleRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+
+    if (article === null) {
+      throw new NotFoundException('삭제되었거나 존재하지 않는 게시물입니다.');
+    }
+    if (article.user.id !== user.id) {
+      throw new UnauthorizedException('권한이 없습니다.');
+    }
+
+    // 아티클 수정
+    article.title = title;
+    article.description = description;
+    article.level = level;
+    article.is_public = is_public;
+    await this.articleRepository.update(id, article);
+
+    // 이전 아티클 블럭 삭제
+    await this.articleBlockRepository.softDelete({
+      article: { id: article.id },
+      deleted_at: IsNull(),
+    });
+
+    // 신규 아티클 블럭 생성
+    for (const block of blocks) {
+      const articleBlock = new ArticleBlockEntity();
+      articleBlock.article = article;
+      articleBlock.order = block.order;
+      articleBlock.link = block.link;
+      articleBlock.description = block.description;
+      await this.articleBlockRepository.save(articleBlock);
+    }
+
+    // 이전 아티클 키워드 삭제
+    await this.articleKeywordRepository.softDelete({
+      article: { id: article.id },
+      deleted_at: IsNull(),
+    });
+
+    // 신규 아티클 키워드 생성
+    for (const name of keywords) {
+      const keyword = await this.keywordRepository.findOne({
+        where: { name: name },
+      });
+
+      const articleKeyword = new ArticleKeywordEntity();
+      articleKeyword.article = article;
+      articleKeyword.keyword = keyword;
+      await this.articleKeywordRepository.save(articleKeyword);
     }
 
     return { id: article.id };
