@@ -29,4 +29,10 @@ export class UserController {
   findMyInfo(@Req() request) {
     return request.user;
   }
+
+  @UseGuards(UserAuthGuard)
+  @Get('advertisements')
+  getMyAdvertisement(@Req() request) {
+    return this.userService.getMyAdvertisement(request.user);
+  }
 }

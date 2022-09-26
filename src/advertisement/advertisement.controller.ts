@@ -1,5 +1,13 @@
 import { AdvertisementService } from './advertisement.service';
-import { Body, Controller, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { UserAuthGuard } from 'src/common/guard/auth.guard';
 import { UpdateAdvertisementRequestDto } from './dto/update.advertisement.request.dto';
 
@@ -19,5 +27,10 @@ export class AdvertisementController {
       request.user,
       updateAdvertisementRequestDto,
     );
+  }
+
+  @Get(':id')
+  getAdvertisement(@Param('id') id: number) {
+    return this.advertisementService.getAdvertisement(id);
   }
 }
