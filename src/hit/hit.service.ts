@@ -1,3 +1,4 @@
+import { UserEntity } from 'src/user/user.entity';
 import { ArticleRepository } from './../article/article.repository';
 import { ArticleEntity } from './../article/entity/article.entity';
 import { HitEntity } from './hit.entity';
@@ -36,14 +37,11 @@ export class HitService {
     hitEntity.article = article;
 
     const hit = await this.hitRepository.findOne({
-      relations: { user: true, article: true },
-      where: { user: hitEntity.user, article: hitEntity.article },
+      where: { user: { id: user.id }, article: { id: article.id } },
     });
 
-    console.log(hit);
-
     if (hit) {
-      return true;
+      return;
     }
 
     await this.hitRepository.save(hitEntity);
