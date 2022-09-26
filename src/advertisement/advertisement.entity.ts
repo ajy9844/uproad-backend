@@ -17,8 +17,8 @@ export class AdvertisementEntity extends CommonEntity {
   title: string;
 
   @Column()
-  current_price: number;
+  link: string;
 
   @Column()
-  link: string;
+  current_price: number;
 }

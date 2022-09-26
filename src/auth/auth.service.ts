@@ -1,4 +1,4 @@
-import { ArticleRepository } from './../article/article.repository';
+import { ArticleRepository } from './../article/repository/article.repository';
 import { ArticleEntity } from 'src/article/entity/article.entity';
 import { SignupRequestDto } from './dto/signup.request.dto';
 import { UserRepository } from 'src/user/user.repository';
