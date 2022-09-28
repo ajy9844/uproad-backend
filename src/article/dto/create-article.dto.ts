@@ -1,4 +1,4 @@
-export class CreateArticleRequestDto {
+export class CreateArticleDto {
   title: string;
   description: string;
   keywords: [string];

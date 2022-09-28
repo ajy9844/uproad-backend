@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ArticleEntity } from './entity/article.entity';
 import { ArticleBlockEntity } from './entity/article-block.entity';
 import { ArticleKeywordEntity } from './entity/article-keyword.entity';
-import { KeywordEntity } from './entity/keyword.entity';
+import { KeywordEntity } from '../keyword/keyword.entity';
 import { AdvertisementEntity } from '../advertisement/advertisement.entity';
 import { AdvertisementModule } from '../advertisement/advertisement.module';
 import { ArticleService } from './article.service';

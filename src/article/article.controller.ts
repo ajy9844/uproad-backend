@@ -1,8 +1,9 @@
-import { Controller, UseGuards, Post, Req, Body, Patch, Param, Delete, HttpCode,} from '@nestjs/common';
+import { Controller, UseGuards, Post, Req, Body, Patch, Param, Delete, HttpCode, Get, Query, } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { UserAuthGuard } from 'src/common/guard/auth.guard';
-import { CreateArticleRequestDto } from './dto/create.article.request.dto';
-import { UpdateArticleRequestDto } from './dto/update.article.request.dto';
+import { CreateArticleDto } from './dto/create-article.dto';
+import { UpdateArticleDto } from './dto/update-article.dto';
+import { ArticleItem } from './dto/article-item.dto';
 
 @Controller('article')
 export class ArticleController {
@@ -10,14 +11,8 @@ export class ArticleController {
 
   @UseGuards(UserAuthGuard)
   @Post()
-  createArticle(
-    @Req() request,
-    @Body() createArticleRequestDto: CreateArticleRequestDto,
-  ) {
-    return this.articleService.createArticle(
-      request.user,
-      createArticleRequestDto,
-    );
+  createArticle(@Req() request, @Body() createArticleDto: CreateArticleDto) {
+    return this.articleService.createArticle(request.user, createArticleDto);
   }
 
   @UseGuards(UserAuthGuard)
@@ -25,12 +20,12 @@ export class ArticleController {
   updateArticle(
     @Param('id') id: number,
     @Req() request,
-    @Body() updateArticleRequestDto: UpdateArticleRequestDto,
+    @Body() updateArticleDto: UpdateArticleDto,
   ) {
     return this.articleService.updateArticle(
       id,
       request.user,
-      updateArticleRequestDto,
+      updateArticleDto,
     );
   }
 
@@ -39,5 +34,10 @@ export class ArticleController {
   @HttpCode(204)
   deleteArticle(@Param('id') id: number, @Req() request) {
     return this.articleService.deleteArticle(id, request.user);
+  }
+
+  @Get(':id')
+  getArticle(@Param('id') id: number): Promise<ArticleItem> {
+    return this.articleService.getArticle(id);
   }
 }

@@ -5,6 +5,7 @@ import { AdvertisementModule } from './advertisement/advertisement.module';
 import { AuthModule } from './auth/auth.module';
 import { ArticleModule } from './article/article.module';
 import { HitModule } from './hit/hit.module';
+import { KeywordModule } from './keyword/keyword.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfig } from './common/config/typeorm.config';
@@ -22,6 +23,7 @@ import { TypeOrmConfig } from './common/config/typeorm.config';
     AdvertisementModule,
     ArticleModule,
     HitModule,
+    KeywordModule,
   ],
 })
 export class AppModule {}

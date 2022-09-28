@@ -1,4 +1,4 @@
-import { KeywordEntity } from './../../article/entity/keyword.entity';
+import { KeywordEntity } from '../../keyword/keyword.entity';
 import { ArticleKeywordEntity } from './../../article/entity/article-keyword.entity';
 import { ArticleBlockEntity } from './../../article/entity/article-block.entity';
 import { UserEntity } from './../../user/user.entity';

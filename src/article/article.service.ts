@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException, } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArticleEntity } from './entity/article.entity';
 import { ArticleRepository } from './repository/article.repository';
@@ -6,14 +6,17 @@ import { ArticleBlockEntity } from './entity/article-block.entity';
 import { ArticleBlockRepository } from './repository/article-block.repository';
 import { ArticleKeywordEntity } from './entity/article-keyword.entity';
 import { ArticleKeywordRepository } from './repository/article-keyword.repository';
-import { KeywordEntity } from './entity/keyword.entity';
-import { KeywordRepository } from './repository/keyword.repository';
+import { KeywordEntity } from '../keyword/keyword.entity';
+import { KeywordRepository } from '../keyword/keyword.repository';
 import { AdvertisementEntity } from '../advertisement/advertisement.entity';
 import { AdvertisementRepository } from '../advertisement/advertisement.repository';
 import { UserEntity } from '../user/user.entity';
-import { CreateArticleRequestDto } from './dto/create.article.request.dto';
-import { UpdateArticleRequestDto } from './dto/update.article.request.dto';
+import { CreateArticleDto } from './dto/create-article.dto';
+import { UpdateArticleDto } from './dto/update-article.dto';
 import { IsNull } from 'typeorm';
+import { Advertisement, Article, ArticleItem, Block, Link, Writer } from './dto/article-item.dto';
+import { parse, parser } from 'html-metadata-parser';
+import { Keyword } from '../keyword/dto/keyword.dto';
 
 @Injectable()
 export class ArticleService {
@@ -30,10 +33,7 @@ export class ArticleService {
     private readonly advertisementRepository: AdvertisementRepository,
   ) {}
 
-  async createArticle(
-    user: UserEntity,
-    createArticleRequestDto: CreateArticleRequestDto,
-  ) {
+  async createArticle(user: UserEntity, createArticleDto: CreateArticleDto) {
     const {
       title,
       description,
@@ -42,7 +42,7 @@ export class ArticleService {
       blocks,
       is_public,
       advertisement,
-    } = createArticleRequestDto;
+    } = createArticleDto;
 
     const article = new ArticleEntity();
     article.user = user;
@@ -88,10 +88,10 @@ export class ArticleService {
   async updateArticle(
     id: number,
     user: UserEntity,
-    updateArticleRequestDto: UpdateArticleRequestDto,
+    updateArticleDto: UpdateArticleDto,
   ) {
     const { title, description, keywords, level, blocks, is_public } =
-      updateArticleRequestDto;
+      updateArticleDto;
 
     const article = await this.articleRepository.findOne({
       where: { id: id },
@@ -104,19 +104,18 @@ export class ArticleService {
     if (article.user.id !== user.id) {
       throw new UnauthorizedException('권한이 없습니다.');
     }
-    // 아티클 수정
+
     article.title = title;
     article.description = description;
     article.level = level;
     article.is_public = is_public;
     await this.articleRepository.update(id, article);
 
-    // 이전 아티클 블럭 삭제
     await this.articleBlockRepository.softDelete({
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-    // 신규 아티클 블럭 생성
+
     for (const block of blocks) {
       const articleBlock = new ArticleBlockEntity();
       articleBlock.article = article;
@@ -126,12 +125,11 @@ export class ArticleService {
       await this.articleBlockRepository.save(articleBlock);
     }
 
-    // 이전 아티클 키워드 삭제
     await this.articleKeywordRepository.softDelete({
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-    // 신규 아티클 키워드 생성
+
     for (const name of keywords) {
       const keyword = await this.keywordRepository.findOne({
         where: { name: name },
@@ -145,6 +143,7 @@ export class ArticleService {
     return { id: article.id };
   }
 
+  //TODO: 캐스케이드 사용해서 연관 엔티티 삭제
   async deleteArticle(id: number, user: UserEntity) {
     const article = await this.articleRepository.findOne({
       where: { id: id },
@@ -158,20 +157,158 @@ export class ArticleService {
       throw new UnauthorizedException('권한이 없습니다.');
     }
 
-    // TODO: CASCADE 사용해서 연관 엔티티들 삭제
-    // 관련 아티클 블럭 삭제
     await this.articleBlockRepository.softDelete({
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-    // 관련 아티클 키워드 삭제
+
     await this.articleKeywordRepository.softDelete({
       article: { id: article.id },
       deleted_at: IsNull(),
     });
-    // 아티클 삭제
+
     await this.articleRepository.softDelete({
       id: article.id,
     });
+  }
+
+  async getArticle(id: number): Promise<ArticleItem> {
+    const article = await this.articleRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+
+    if (article === null) {
+      throw new NotFoundException('삭제되었거나 존재하지 않은 게시물입니다.');
+    }
+    if (article.is_public === false) {
+      throw new ConflictException('공개되지 않은 게시물입니다.');
+    }
+
+    const articleKeywords = await this.articleKeywordRepository.find({
+      where: { article: { id: article.id } },
+      relations: ['keyword'],
+    });
+
+    const articleBlocks = await this.articleBlockRepository.find({
+      where: { article: { id: article.id } },
+      order: {
+        order: 'ASC',
+      },
+    });
+
+    const articleAdvertisement = await this.advertisementRepository.findOne({
+      where: { article: { id: article.id } },
+    });
+
+    //FIXME: circular reference 문제 해결
+    /*
+    const hitCount = await this.hitRepository.findAndCount({
+      where: { article: { id: id } },
+    });
+
+    const likeCount = await this.likeRepository.findAndCount({
+      where: { article: { id: id } },
+    });
+     */
+
+    const articles = await this.articleRepository.find({
+      where: { user: { id: article.user.id } },
+      order: {
+        id: 'ASC',
+      },
+    });
+
+    const curArticleIdx = articles.findIndex((x) => x.id === article.id);
+    const prevArticleIdx = curArticleIdx - 1;
+    const nextArticleIdx =
+      curArticleIdx + 1 === articles.length ? -1 : curArticleIdx + 1;
+
+    // article
+    const articleItem = new ArticleItem();
+    articleItem.id = article.id;
+    articleItem.title = article.title;
+    articleItem.description = article.description;
+    articleItem.level = article.level;
+    articleItem.created_at = article.created_at.toISOString();
+    articleItem.updated_at = article.updated_at.toISOString();
+
+    // keywords
+    const keywords: Keyword[] = [];
+    for (const articleKeyword of articleKeywords) {
+      const keyword = new Keyword();
+      keyword.id = articleKeyword.keyword.id;
+      keyword.name = articleKeyword.keyword.name;
+      keywords.push(keyword);
+    }
+    articleItem.keywords = keywords;
+
+    // blocks
+    const blocks: Block[] = [];
+    for (const articleBlock of articleBlocks) {
+      const block = new Block();
+      block.id = articleBlock.id;
+      block.order = articleBlock.order;
+      block.description = articleBlock.description;
+
+      // html-metadata-parser
+      block.link = new Link();
+      await parser(articleBlock.link).then((result) => {
+        block.link.site_name = result.og.site_name !== undefined
+            ? result.og.site_name : null;
+        block.link.url = result.og.url !== undefined
+            ? result.og.url : articleBlock.link;
+        block.link.title = result.og.title !== undefined
+            ? result.og.title : null;
+        block.link.image = result.og.image !== undefined
+            ? result.og.image : null;
+        block.link.description = result.og.description !== undefined
+            ? result.og.description : null;
+        block.link.type = result.og.type !== undefined
+            ? result.og.type : null;
+      });
+      blocks.push(block);
+    }
+    articleItem.blocks = blocks;
+
+    // advertisement
+    let advertisement = null;
+    if (articleAdvertisement !== null) {
+      advertisement = new Advertisement();
+      advertisement.id = articleAdvertisement.id;
+      advertisement.link = articleAdvertisement.link;
+      advertisement.current_price = articleAdvertisement.current_price;
+    }
+    articleItem.advertisement = advertisement;
+
+    // writer
+    const writer = new Writer();
+    writer.nickname = article.user.nickname;
+    writer.profile_image = article.user.profile_image;
+    articleItem.writer = writer;
+
+    // hit, like (default)
+    articleItem.hit = 10;
+    articleItem.like = 10;
+
+    // previous article
+    let prevArticle = null;
+    if (prevArticleIdx !== -1) {
+      prevArticle = new Article();
+      prevArticle.id = articles[prevArticleIdx].id;
+      prevArticle.title = articles[prevArticleIdx].title;
+    }
+    articleItem.prev_article = prevArticle;
+
+    // next article
+    let nextArticle = null;
+    if (nextArticleIdx !== -1) {
+      nextArticle = new Article();
+      nextArticle.id = articles[nextArticleIdx].id;
+      nextArticle.title = articles[nextArticleIdx].title;
+    }
+    articleItem.next_article = nextArticle;
+
+    return articleItem;
   }
 }

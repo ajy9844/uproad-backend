@@ -1,6 +1,6 @@
 import { CommonEntity } from 'src/common/entity/common.entity';
 import { Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { KeywordEntity } from './keyword.entity';
+import { KeywordEntity } from '../../keyword/keyword.entity';
 import { ArticleEntity } from './article.entity';
 
 @Entity('article_keyword')
