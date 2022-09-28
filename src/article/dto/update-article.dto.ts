@@ -1,6 +1,6 @@
-import { Block } from './create.article.request.dto';
+import { Block } from './create-article.dto';
 
-export class UpdateArticleRequestDto {
+export class UpdateArticleDto {
   title: string;
   description: string;
   keywords: [string];

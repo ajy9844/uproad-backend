@@ -1,8 +1,8 @@
 import { Controller, UseGuards, Post, Req, Body, Patch, Param, Delete, HttpCode,} from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { UserAuthGuard } from 'src/common/guard/auth.guard';
-import { CreateArticleRequestDto } from './dto/create.article.request.dto';
-import { UpdateArticleRequestDto } from './dto/update.article.request.dto';
+import { CreateArticleDto } from './dto/create-article.dto';
+import { UpdateArticleDto } from './dto/update-article.dto';
 
 @Controller('article')
 export class ArticleController {
@@ -10,14 +10,8 @@ export class ArticleController {
 
   @UseGuards(UserAuthGuard)
   @Post()
-  createArticle(
-    @Req() request,
-    @Body() createArticleRequestDto: CreateArticleRequestDto,
-  ) {
-    return this.articleService.createArticle(
-      request.user,
-      createArticleRequestDto,
-    );
+  createArticle(@Req() request, @Body() createArticleDto: CreateArticleDto) {
+    return this.articleService.createArticle(request.user, createArticleDto);
   }
 
   @UseGuards(UserAuthGuard)
@@ -25,12 +19,12 @@ export class ArticleController {
   updateArticle(
     @Param('id') id: number,
     @Req() request,
-    @Body() updateArticleRequestDto: UpdateArticleRequestDto,
+    @Body() updateArticleDto: UpdateArticleDto,
   ) {
     return this.articleService.updateArticle(
       id,
       request.user,
-      updateArticleRequestDto,
+      updateArticleDto,
     );
   }
 
