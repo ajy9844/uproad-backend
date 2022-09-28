@@ -6,16 +6,17 @@ import { ArticleBlockEntity } from './entity/article-block.entity';
 import { ArticleBlockRepository } from './repository/article-block.repository';
 import { ArticleKeywordEntity } from './entity/article-keyword.entity';
 import { ArticleKeywordRepository } from './repository/article-keyword.repository';
-import { KeywordEntity } from './entity/keyword.entity';
-import { KeywordRepository } from './repository/keyword.repository';
+import { KeywordEntity } from '../keyword/keyword.entity';
+import { KeywordRepository } from '../keyword/keyword.repository';
 import { AdvertisementEntity } from '../advertisement/advertisement.entity';
 import { AdvertisementRepository } from '../advertisement/advertisement.repository';
 import { UserEntity } from '../user/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { IsNull } from 'typeorm';
-import { Advertisement, Article, ArticleItem, Block, Keyword, Link, Writer } from './dto/article-item.dto';
+import { Advertisement, Article, ArticleItem, Block, Link, Writer } from './dto/article-item.dto';
 import { parse, parser } from 'html-metadata-parser';
+import { Keyword } from '../keyword/dto/keyword.dto';
 
 @Injectable()
 export class ArticleService {
@@ -286,7 +287,7 @@ export class ArticleService {
     writer.profile_image = article.user.profile_image;
     articleItem.writer = writer;
 
-    // hit, like
+    // hit, like (default)
     articleItem.hit = 10;
     articleItem.like = 10;
 

@@ -1,3 +1,5 @@
+import { Keyword } from '../../keyword/dto/keyword.dto';
+
 export class ArticleItem {
   id: number;
   title: string;
@@ -13,11 +15,6 @@ export class ArticleItem {
   next_article: Article;
   created_at: string;
   updated_at: string;
-}
-
-export class Keyword {
-  id: number;
-  name: string;
 }
 
 export class Block {
