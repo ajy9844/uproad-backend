@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException, } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArticleEntity } from './entity/article.entity';
 import { ArticleRepository } from './repository/article.repository';
@@ -14,6 +14,8 @@ import { UserEntity } from '../user/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { IsNull } from 'typeorm';
+import { Advertisement, Article, ArticleItem, Block, Keyword, Link, Writer } from './dto/article-item.dto';
+import { parse, parser } from 'html-metadata-parser';
 
 @Injectable()
 export class ArticleService {
@@ -167,5 +169,145 @@ export class ArticleService {
     await this.articleRepository.softDelete({
       id: article.id,
     });
+  }
+
+  async getArticle(id: number): Promise<ArticleItem> {
+    const article = await this.articleRepository.findOne({
+      where: { id: id },
+      relations: ['user'],
+    });
+
+    if (article === null) {
+      throw new NotFoundException('삭제되었거나 존재하지 않은 게시물입니다.');
+    }
+    if (article.is_public === false) {
+      throw new ConflictException('공개되지 않은 게시물입니다.');
+    }
+
+    const articleKeywords = await this.articleKeywordRepository.find({
+      where: { article: { id: article.id } },
+      relations: ['keyword'],
+    });
+
+    const articleBlocks = await this.articleBlockRepository.find({
+      where: { article: { id: article.id } },
+      order: {
+        order: 'ASC',
+      },
+    });
+
+    const articleAdvertisement = await this.advertisementRepository.findOne({
+      where: { article: { id: article.id } },
+    });
+
+    //FIXME: circular reference 문제 해결
+    /*
+    const hitCount = await this.hitRepository.findAndCount({
+      where: { article: { id: id } },
+    });
+
+    const likeCount = await this.likeRepository.findAndCount({
+      where: { article: { id: id } },
+    });
+     */
+
+    const articles = await this.articleRepository.find({
+      where: { user: { id: article.user.id } },
+      order: {
+        id: 'ASC',
+      },
+    });
+
+    const curArticleIdx = articles.findIndex((x) => x.id === article.id);
+    const prevArticleIdx = curArticleIdx - 1;
+    const nextArticleIdx =
+      curArticleIdx + 1 === articles.length ? -1 : curArticleIdx + 1;
+
+    // article
+    const articleItem = new ArticleItem();
+    articleItem.id = article.id;
+    articleItem.title = article.title;
+    articleItem.description = article.description;
+    articleItem.level = article.level;
+    articleItem.created_at = article.created_at.toISOString();
+    articleItem.updated_at = article.updated_at.toISOString();
+
+    // keywords
+    const keywords: Keyword[] = [];
+    for (const articleKeyword of articleKeywords) {
+      const keyword = new Keyword();
+      keyword.id = articleKeyword.keyword.id;
+      keyword.name = articleKeyword.keyword.name;
+      keywords.push(keyword);
+    }
+    articleItem.keywords = keywords;
+
+    // blocks
+    const blocks: Block[] = [];
+    for (const articleBlock of articleBlocks) {
+      const block = new Block();
+      block.id = articleBlock.id;
+      block.order = articleBlock.order;
+      block.description = articleBlock.description;
+
+      // html-metadata-parser
+      block.link = new Link();
+      await parser(articleBlock.link).then((result) => {
+        block.link.site_name = result.og.site_name !== undefined
+            ? result.og.site_name : null;
+        block.link.url = result.og.url !== undefined
+            ? result.og.url : articleBlock.link;
+        block.link.title = result.og.title !== undefined
+            ? result.og.title : null;
+        block.link.image = result.og.image !== undefined
+            ? result.og.image : null;
+        block.link.description = result.og.description !== undefined
+            ? result.og.description : null;
+        block.link.type = result.og.type !== undefined
+            ? result.og.type : null;
+      });
+      blocks.push(block);
+    }
+    articleItem.blocks = blocks;
+
+    // advertisement
+    let advertisement = null;
+    if (articleAdvertisement !== null) {
+      advertisement = new Advertisement();
+      advertisement.id = articleAdvertisement.id;
+      advertisement.link = articleAdvertisement.link;
+      advertisement.current_price = articleAdvertisement.current_price;
+    }
+    articleItem.advertisement = advertisement;
+
+    // writer
+    const writer = new Writer();
+    writer.nickname = article.user.nickname;
+    writer.profile_image = article.user.profile_image;
+    articleItem.writer = writer;
+
+    // hit, like
+    articleItem.hit = 10;
+    articleItem.like = 10;
+
+    // previous article
+    let prevArticle = null;
+    if (prevArticleIdx !== -1) {
+      prevArticle = new Article();
+      prevArticle.id = articles[prevArticleIdx].id;
+      prevArticle.title = articles[prevArticleIdx].title;
+    }
+    articleItem.prev_article = prevArticle;
+
+    // next article
+    let nextArticle = null;
+    if (nextArticleIdx !== -1) {
+      nextArticle = new Article();
+      nextArticle.id = articles[nextArticleIdx].id;
+      nextArticle.title = articles[nextArticleIdx].title;
+    }
+    articleItem.next_article = nextArticle;
+
+    return articleItem;
   }
 }
