@@ -36,6 +36,16 @@ export class ArticleController {
     return this.articleService.deleteArticle(id, request.user);
   }
 
+  @Get()
+  getArticles(
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+    @Query('sort') sort: string,
+    @Query('query') query: string,
+  ): Promise<ArticleItem[]> {
+    return this.articleService.getArticles(limit, page, sort, query);
+  }
+
   @Get(':id')
   getArticle(@Param('id') id: number): Promise<ArticleItem> {
     return this.articleService.getArticle(id);

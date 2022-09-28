@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ArticleEntity } from './entity/article.entity';
 import { ArticleRepository } from './repository/article.repository';
@@ -13,10 +13,10 @@ import { AdvertisementRepository } from '../advertisement/advertisement.reposito
 import { UserEntity } from '../user/user.entity';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
-import { IsNull } from 'typeorm';
-import { Advertisement, Article, ArticleItem, Block, Link, Writer } from './dto/article-item.dto';
+import { IsNull, Like } from 'typeorm';
 import { parse, parser } from 'html-metadata-parser';
 import { Keyword } from '../keyword/dto/keyword.dto';
+import { Advertisement, Article, ArticleItem, Block, Link, Writer } from './dto/article-item.dto';
 
 @Injectable()
 export class ArticleService {
@@ -172,6 +172,74 @@ export class ArticleService {
     });
   }
 
+  async getArticles(
+    limit: number,
+    page: number,
+    sort: string,
+    query: string,
+  ): Promise<ArticleItem[]> {
+    const articleItems: ArticleItem[] = [];
+
+    if (sort === 'latest' || sort === 'trending') {
+      const articles = await this.articleRepository.find({
+        relations: ['user'],
+        where: [
+          { title: Like('%' + query + '%') },
+          { description: Like('%' + query + '%') },
+        ],
+        order: {
+          created_at: 'DESC',
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        cache: true,
+      });
+
+      for (const article of articles) {
+        const articleItem = new ArticleItem();
+        // article
+        articleItem.id = article.id;
+        articleItem.title = article.title;
+        articleItem.description = article.description;
+        articleItem.level = article.level;
+        articleItem.created_at = article.created_at.toISOString();
+        articleItem.updated_at = article.updated_at.toISOString();
+
+        // keywords
+        const articleKeywords = await this.articleKeywordRepository.find({
+          where: { article: { id: article.id } },
+          relations: ['keyword'],
+        });
+
+        const keywords: Keyword[] = [];
+        for (const articleKeyword of articleKeywords) {
+          const keyword = new Keyword();
+          keyword.id = articleKeyword.keyword.id;
+          keyword.name = articleKeyword.keyword.name;
+          keywords.push(keyword);
+        }
+        articleItem.keywords = keywords;
+
+        // writer
+        articleItem.writer = new Writer();
+        articleItem.writer.nickname = article.user.nickname;
+        articleItem.writer.profile_image = article.user.profile_image;
+
+        // hit, like
+        articleItem.hit = 10;
+        articleItem.like = 10;
+
+        articleItems.push(articleItem);
+      }
+    //} else if (sort === 'trending') {
+    //  //TODO
+    } else {
+      throw new BadRequestException('잘못된 요청입니다.');
+    }
+
+    return articleItems;
+  }
+
   async getArticle(id: number): Promise<ArticleItem> {
     const article = await this.articleRepository.findOne({
       where: { id: id },
@@ -254,18 +322,17 @@ export class ArticleService {
       // html-metadata-parser
       block.link = new Link();
       await parser(articleBlock.link).then((result) => {
-        block.link.site_name = result.og.site_name !== undefined
-            ? result.og.site_name : null;
-        block.link.url = result.og.url !== undefined
-            ? result.og.url : articleBlock.link;
-        block.link.title = result.og.title !== undefined
-            ? result.og.title : null;
-        block.link.image = result.og.image !== undefined
-            ? result.og.image : null;
-        block.link.description = result.og.description !== undefined
-            ? result.og.description : null;
-        block.link.type = result.og.type !== undefined
-            ? result.og.type : null;
+        block.link.site_name =
+          result.og.site_name !== undefined ? result.og.site_name : null;
+        block.link.url =
+          result.og.url !== undefined ? result.og.url : articleBlock.link;
+        block.link.title =
+          result.og.title !== undefined ? result.og.title : null;
+        block.link.image =
+          result.og.image !== undefined ? result.og.image : null;
+        block.link.description =
+          result.og.description !== undefined ? result.og.description : null;
+        block.link.type = result.og.type !== undefined ? result.og.type : null;
       });
       blocks.push(block);
     }
